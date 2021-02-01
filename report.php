@@ -29,6 +29,7 @@ require_once($CFG->libdir . '/formslib.php');
 require_once ('lib.php');
 defined('MOODLE_INTERNAL') || die();
 require_login();
+global $DB;
 $context = context_system::instance();
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('admin');
@@ -67,7 +68,7 @@ if ($mform->is_cancelled()) {
 			get_string('email','local_course_hours'),
 			get_string('cduration','local_course_hours'),
 			get_string('coursename','local_course_hours'),
-			//get_string('enrolldate','local_course_hours'),
+			get_string('enrolldate','local_course_hours'),
 			get_string('hpclcategory','local_course_hours'),
 			get_string('coursecode','local_course_hours'),
 			get_string('rfacultycode','local_course_hours'),
@@ -78,9 +79,17 @@ if ($mform->is_cancelled()) {
 			get_string('available','local_course_hours') );
 		$counter = 1;
 		foreach ($results as $result) {
-			
+			//Rachita :  If the enrollment date is '0' then find the enrollment date from the 'user_enrolment' table. 01/02/2021.
+			$enroltime = "";
 			if ($result->timeenrolled == 0) {
-				$result->timeenrolled = '-';
+				$userid = $DB->get_field('user','id',array('username'=>$result->username));
+				$courseid=$DB->get_field('course','id',array('fullname'=>$result->fullname));
+				$query="SELECT ue.timecreated FROM {user_enrolments} AS ue 
+				JOIN {enrol} AS en  ON ue.enrolid = en.id 
+				WHERE courseid = $courseid AND userid = $userid";
+				$data=$DB->get_record_sql($query);
+				$enroltime = $data->timecreated;
+				$result->timeenrolled = $enroltime;
 			}
 			$report->data[]=array($counter,
 				$result->username,
@@ -89,7 +98,7 @@ if ($mform->is_cancelled()) {
 				$result->email,
 				$result->cduration,
 				$result->fullname,
-				//$result->timeenrolled,
+				date("d-m-Y",$result->timeenrolled),
 				$result->hpclcategory,
 				$result->coursecode,
 				$result->facultycode,
@@ -100,7 +109,6 @@ if ($mform->is_cancelled()) {
 				$result->summativeassessment );
 			$counter++;
 		}
-
 		$html.=html_writer::start_div('container-fluid');
 		$html.=html_writer::start_div('row');
 		$html.=html_writer::start_div('col-md-12');
