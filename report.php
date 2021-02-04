@@ -94,7 +94,8 @@ if ($mform->is_cancelled()) {
 					$result->timeenrolled = $enroltime;
 				}else{
 
-					$result->timeenrolled = "-";
+					//Manju: if the enrolldate is 0 then completion date - 58 days.
+					$result->timeenrolled = date('Y-m-d', strtotime('-58 day', $result->unixtime));
 				}
 			}
 			$report->data[]=array($counter,
