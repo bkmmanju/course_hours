@@ -79,24 +79,51 @@ if ($mform->is_cancelled()) {
 			get_string('available','local_course_hours') );
 		$counter = 1;
 		foreach ($results as $result) {
+			//userid.
+			$uid = $result->userid;
+			//courseid.
+			$cid = $result->courseid;
+
 			//Rachita :  If the enrollment date is '0' then find the enrollment date from the 'user_enrolment' table. 01/02/2021.
 			$enroltime = "";
 			if ($result->timeenrolled == 0) {
-				$userid = $DB->get_field('user','id',array('username'=>$result->username));
-				$courseid=$DB->get_field('course','id',array('fullname'=>$result->fullname));
 				//here I am checking userid and courseid are empty or not.
 				if(!empty($userid) && !empty($courseid)){
 					$query="SELECT ue.timecreated FROM {user_enrolments} AS ue 
 					JOIN {enrol} AS en  ON ue.enrolid = en.id 
-					WHERE courseid = $courseid AND userid = $userid";
-					$data=$DB->get_record_sql($query);
+					WHERE en.courseid = $cid AND ue.userid = $uid";
+					$data = $DB->get_record_sql($query);
 					$enroltime = $data->timecreated;
 					$result->timeenrolled = $enroltime;
 				}else{
-
 					//Manju: if the enrolldate is 0 then completion date - 58 days.
-					$result->timeenrolled = date('Y-m-d', strtotime('-58 day', $result->unixtime));
+					$endate = date('Y-m-d', strtotime('-58 day', $result->unixtime));
+					$result->timeenrolled = strtotime($endate);
 				}
+			}
+			//manju: inserting all the date to table.
+			//checking if the courseid and userid is already present or not.
+			$check = $DB->get_records('hpcl_report_query_data',array('courseid'=>$cid,'userid'=>$uid));
+			if(empty($check)){
+				$insert = new stdClass();
+				$insert->userid = $uid;
+				$insert->courseid = $cid;
+				$insert->username = $result->username;
+				$insert->firstname = $result->firstname;
+				$insert->lastname = $result->lastname;
+				$insert->email = $result->email;
+				$insert->courseduration = $result->cduration;
+				$insert->coursename = $result->fullname;
+				$insert->enrolldate = $result->timeenrolled;
+				$insert->hpclcategory = $result->hpclcategory;
+				$insert->coursecode = $result->coursecode;
+				$insert->facultycode = $result->facultycode;
+				$insert->coursecompletion = $result->timecompleted;
+				$insert->learningtype = $result->learnigtype;
+				$insert->programtype = $result->programtype;
+				$insert->vendorname = $result->vendor;
+				$insert->summative_assessment = $result->summativeassessment;
+				$DB->insert_record('hpcl_report_query_data',$insert);
 			}
 			$report->data[]=array($counter,
 				$result->username,

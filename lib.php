@@ -219,8 +219,8 @@ WHERE (cc.timeenrolled BETWEEN startdate AND enddate) OR (cc.timecompleted BETWE
 
 */
     if(!empty($startdate) && !empty($enddate)){
-        $result = $DB->get_records_sql("SELECT cc.id, u.username, u.firstname, u.lastname, u.email, ch.hours as CDuration, ch.hpclcategory,ch.coursecode, c.fullname, cc.timeenrolled as timeenrolled, 
-		FROM_UNIXTIME(cc.timecompleted) as timecompleted,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment  
+        $result = $DB->get_records_sql("SELECT cc.id, u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email, ch.hours as CDuration, ch.hpclcategory,ch.coursecode, c.fullname, cc.timeenrolled as timeenrolled, 
+		FROM_UNIXTIME(cc.timecompleted) as timecompleted,cc.timecompleted as unixtime,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment  
             FROM {course} AS c
             JOIN {hpcl_coursehours} as ch ON c.id = ch.course_id
             JOIN {course_completions} AS cc ON cc.course = c.id 
@@ -228,6 +228,7 @@ WHERE (cc.timeenrolled BETWEEN startdate AND enddate) OR (cc.timecompleted BETWE
             WHERE (cc.timecompleted BETWEEN '$startdate' AND '$enddate')
             ORDER by cc.timeenrolled");
         return $result;
+
     }
 }
 
