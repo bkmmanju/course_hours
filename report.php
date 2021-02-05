@@ -83,12 +83,11 @@ if ($mform->is_cancelled()) {
 			$uid = $result->userid;
 			//courseid.
 			$cid = $result->courseid;
-
 			//Rachita :  If the enrollment date is '0' then find the enrollment date from the 'user_enrolment' table. 01/02/2021.
 			$enroltime = "";
 			if ($result->timeenrolled == 0) {
 				//here I am checking userid and courseid are empty or not.
-				if(!empty($userid) && !empty($courseid)){
+				if(!empty($uid) && !empty($cid)){
 					$query="SELECT ue.timecreated FROM {user_enrolments} AS ue 
 					JOIN {enrol} AS en  ON ue.enrolid = en.id 
 					WHERE en.courseid = $cid AND ue.userid = $uid";
@@ -100,30 +99,6 @@ if ($mform->is_cancelled()) {
 					$endate = date('Y-m-d', strtotime('-58 day', $result->unixtime));
 					$result->timeenrolled = strtotime($endate);
 				}
-			}
-			//manju: inserting all the date to table.
-			//checking if the courseid and userid is already present or not.
-			$check = $DB->get_records('hpcl_report_query_data',array('courseid'=>$cid,'userid'=>$uid));
-			if(empty($check)){
-				$insert = new stdClass();
-				$insert->userid = $uid;
-				$insert->courseid = $cid;
-				$insert->username = $result->username;
-				$insert->firstname = $result->firstname;
-				$insert->lastname = $result->lastname;
-				$insert->email = $result->email;
-				$insert->courseduration = $result->cduration;
-				$insert->coursename = $result->fullname;
-				$insert->enrolldate = $result->timeenrolled;
-				$insert->hpclcategory = $result->hpclcategory;
-				$insert->coursecode = $result->coursecode;
-				$insert->facultycode = $result->facultycode;
-				$insert->coursecompletion = $result->timecompleted;
-				$insert->learningtype = $result->learnigtype;
-				$insert->programtype = $result->programtype;
-				$insert->vendorname = $result->vendor;
-				$insert->summative_assessment = $result->summativeassessment;
-				$DB->insert_record('hpcl_report_query_data',$insert);
 			}
 			$report->data[]=array($counter,
 				$result->username,
