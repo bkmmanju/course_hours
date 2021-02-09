@@ -49,8 +49,13 @@ class local_course_hours_filter extends moodleform
 		$buttonarray = array();
 		$buttonarray[] = $mform->createElement('submit','submitbutton',get_string('savebutton','local_course_hours'));
 		$buttonarray[] = $mform->createElement('cancel');
+		//manju : adding new button (sync data).
+		// $buttonarray[] = $mform->createElement('submit',array('onclick'=>'data();'),get_string('syncdata','local_course_hours'));
+		$buttonarray[] = $mform->createElement('submit', 'syncdata',get_string('syncdata','local_course_hours'),array('onclick'=>'syncdata();'));
 
 		$mform->addGroup($buttonarray,'buttonarray','','',false);
 		//action buttons end here//
+
+
 	}
 }

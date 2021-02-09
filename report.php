@@ -51,12 +51,17 @@ $PAGE->requires->js(new moodle_url($CFG->wwwroot.'/local/course_hours/js/jszip.m
 $PAGE->requires->js(new moodle_url($CFG->wwwroot.'/local/course_hours/js/pdfmake.min.js'),true);
 $PAGE->requires->js(new moodle_url($CFG->wwwroot.'/local/course_hours/js/vfs_fonts.js'),true);
 $mform = new local_course_hours_filter();
-echo $OUTPUT->header();
 $html='';
 if ($mform->is_cancelled()) {
-} else if ($data = $mform->get_data()) {
+} else if ($data = $mform->get_data()) {	
 	$startdate = $data->reportstart;
 	$enddate = $data->reportend;
+	//manju : Checking for whether form submitted for sync data.
+	if(!empty($data->syncdata)){
+		$url = $CFG->wwwroot.'/local/course_hours/syncdata.php?startdate='.$startdate.'&enddate='.$enddate;
+		redirect($url);
+	}
+	
 	$results = report_data($startdate,$enddate);
 	if(!empty($results)){
 		$report = new html_table();
@@ -83,11 +88,12 @@ if ($mform->is_cancelled()) {
 			$uid = $result->userid;
 			//courseid.
 			$cid = $result->courseid;
+
 			//Rachita :  If the enrollment date is '0' then find the enrollment date from the 'user_enrolment' table. 01/02/2021.
 			$enroltime = "";
 			if ($result->timeenrolled == 0) {
 				//here I am checking userid and courseid are empty or not.
-				if(!empty($uid) && !empty($cid)){
+				if(!empty($userid) && !empty($courseid)){
 					$query="SELECT ue.timecreated FROM {user_enrolments} AS ue 
 					JOIN {enrol} AS en  ON ue.enrolid = en.id 
 					WHERE en.courseid = $cid AND ue.userid = $uid";
@@ -159,6 +165,8 @@ if ($mform->is_cancelled()) {
 		$html.=html_writer::end_div();		
 	}
 }
+
+echo $OUTPUT->header();
 $mform->display();
 echo $html;
 echo $OUTPUT->footer();

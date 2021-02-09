@@ -5,6 +5,9 @@ $string['hours'] = 'Add duration in Minutes';
 $string['timing'] = 'Timing';
 $string['edit_course_hours'] = 'Edit Course Hours';
 $string['savebutton'] = 'Submit';
+// manju : 09/02/2020.
+$string['syncdata'] = 'Sync Data';
+$string['notify'] = 'Successfully Synced';
 $string['local'] = 'local';
 $string['manage_datas'] = 'Manage Course Hours';
 $string['messagedisplay'] = 'Data deteled successfully.';
