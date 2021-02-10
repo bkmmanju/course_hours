@@ -93,7 +93,7 @@ if ($mform->is_cancelled()) {
 			$enroltime = "";
 			if ($result->timeenrolled == 0) {
 				//here I am checking userid and courseid are empty or not.
-				if(!empty($userid) && !empty($courseid)){
+				if(!empty($uid) && !empty($cid)){
 					$query="SELECT ue.timecreated FROM {user_enrolments} AS ue 
 					JOIN {enrol} AS en  ON ue.enrolid = en.id 
 					WHERE en.courseid = $cid AND ue.userid = $uid";
