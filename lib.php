@@ -203,7 +203,7 @@ function report_data($startdate,$enddate){
             JOIN {course_completions} AS cc ON cc.course = c.id AND cc.userid = u.id 
             WHERE (cc.timeenrolled BETWEEN '$startdate' AND '$enddate') OR (cc.timecompleted BETWEEN '$startdate' AND '$enddate')
             ORDER by cc.timeenrolled");
-	**/
+            **/
 	/*
 		SELECT u.username,ch.coursecode,c.fullname as programname, 
 ch.hpclcategory,ch.learnigtype as deliverytype,
@@ -218,18 +218,59 @@ JOIN mdl_user AS u ON u.id = cc.userid
 WHERE (cc.timeenrolled BETWEEN startdate AND enddate) OR (cc.timecompleted BETWEEN startdate AND enddate)
 
 */
-    if(!empty($startdate) && !empty($enddate)){
-        $result = $DB->get_records_sql("SELECT cc.id, u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email, ch.hours as CDuration, ch.hpclcategory,ch.coursecode, c.fullname, cc.timeenrolled as timeenrolled, 
-		FROM_UNIXTIME(cc.timecompleted) as timecompleted,cc.timecompleted as unixtime,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment  
-            FROM {course} AS c
-            JOIN {hpcl_coursehours} as ch ON c.id = ch.course_id
-            JOIN {course_completions} AS cc ON cc.course = c.id 
-			JOIN {user} AS u ON u.id = cc.userid
-            WHERE (cc.timecompleted BETWEEN '$startdate' AND '$enddate')
-            ORDER by cc.timeenrolled");
-        return $result;
+if(!empty($startdate) && !empty($enddate)){
 
+    $result = $DB->get_records_sql("SELECT cc.id, u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email, ch.hours as CDuration, ch.hpclcategory,ch.coursecode, c.fullname, cc.timeenrolled as timeenrolled, 
+      FROM_UNIXTIME(cc.timecompleted) as timecompleted,cc.timecompleted as unixtime,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment  
+      FROM {course} AS c
+      JOIN {hpcl_coursehours} as ch ON c.id = ch.course_id
+      JOIN {course_completions} AS cc ON cc.course = c.id 
+      JOIN {user} AS u ON u.id = cc.userid
+      WHERE (cc.timecompleted BETWEEN '$startdate' AND '$enddate')
+      ORDER by cc.timeenrolled");
+    return $result;
+
+}
+}
+
+
+function all_enroll_and_completion_data($startdate, $enddate){
+    global $DB;
+    //get all the users completed courses in the selected time period.
+    $completiondata = $DB->get_records_sql("SELECT cc.id, u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email, ch.hours as CDuration, ch.hpclcategory,ch.coursecode, c.fullname, cc.timeenrolled as timeenrolled, 
+        FROM_UNIXTIME(cc.timecompleted) as timecompleted,cc.timecompleted as unixtime,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment  
+        FROM {course} AS c
+        JOIN {hpcl_coursehours} as ch ON c.id = ch.course_id
+        JOIN {course_completions} AS cc ON cc.course = c.id 
+        JOIN {user} AS u ON u.id = cc.userid
+        WHERE (cc.timecompleted BETWEEN '$startdate' AND '$enddate')
+        ORDER by cc.timeenrolled");
+
+    $completedarray = [];
+    if(!empty($completiondata)){
+        foreach ($completiondata as $compkey => $compvalue) {
+            $completedarray[]=array('userid'=>$compvalue->userid,'courseid'=>$compvalue->courseid);
+        }
     }
+    //get all the users enrolled courses in the selected time period.
+    $enrolldata = $DB->get_records_sql("SELECT cc.id, u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email, ch.hours as CDuration, ch.hpclcategory,ch.coursecode, c.fullname, cc.timeenrolled as timeenrolled, 
+        FROM_UNIXTIME(cc.timecompleted) as timecompleted,cc.timecompleted as unixtime,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment  
+        FROM {course} AS c
+        JOIN {hpcl_coursehours} as ch ON c.id = ch.course_id
+        JOIN {course_completions} AS cc ON cc.course = c.id 
+        JOIN {user} AS u ON u.id = cc.userid
+        WHERE (cc.timeenrolled BETWEEN '$startdate' AND '$enddate')
+        ORDER by cc.timeenrolled");
+
+    if(!empty($enrolldata)){
+        foreach ($enrolldata as $enrolkey => $enrolvalue) {
+            if(array_search($enrolvalue->userid, array_column($completedarray, 'userid')) !== False && array_search($enrolvalue->courseid, array_column($completedarray, 'courseid')) !== False){
+            }else{
+                $completiondata[] = $enrolvalue;
+            }
+        }
+    }
+    return $completiondata;
 }
 
 

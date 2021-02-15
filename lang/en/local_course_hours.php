@@ -60,5 +60,8 @@ $string['others'] = 'Others';
 $string['anyothers'] = 'Any Other';
 $string['rfacultycode'] = 'Faculty Code';
 
+$string['enrolandcompletion'] = 'Enrol and Completion Report';
+$string['back'] = 'Back';
+
 
 
