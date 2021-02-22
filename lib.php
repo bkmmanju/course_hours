@@ -249,11 +249,11 @@ function all_enroll_and_completion_data($startdate, $enddate){
     $completedarray = [];
     if(!empty($completiondata)){
         foreach ($completiondata as $compkey => $compvalue) {
-            $completedarray[]=array('userid'=>$compvalue->userid,'courseid'=>$compvalue->courseid);
+            $completedarray[$compvalue->userid.'-'.$compvalue->courseid]=$compvalue->fullname;
         }
     }
     //get all the users enrolled courses in the selected time period.
-    $enrolldata = $DB->get_records_sql("SELECT u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email,ch.hours as CDuration, c.fullname, ue.timecreated as timeenrolled, ch.hpclcategory, ch.coursecode,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment 
+    $enrolldata = $DB->get_records_sql("SELECT ue.id, u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email,ch.hours as CDuration, c.fullname, ue.timecreated as timeenrolled, ch.hpclcategory, ch.coursecode,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment 
         FROM {user} AS u
         JOIN {user_enrolments} AS ue ON ue.userid = u.id
         JOIN {enrol} AS e ON ue.enrolid = e.id
@@ -273,12 +273,18 @@ function all_enroll_and_completion_data($startdate, $enddate){
 
     if(!empty($enrolldata)){
         foreach ($enrolldata as $enrolkey => $enrolvalue) {
-            if(array_search($enrolvalue->userid, array_column($completedarray, 'userid')) !== False && array_search($enrolvalue->courseid, array_column($completedarray, 'courseid')) !== False){
+            if(array_key_exists($enrolvalue->userid.'-'.$enrolvalue->courseid,$completedarray)){
             }else{
                 //Manju: course completion date will not be there for only enrollment so taken as "-".
                 $enrolvalue->timecompleted = "-";
                 $completiondata[] = $enrolvalue;
             }
+            // if(array_search($enrolvalue->userid, array_column($completedarray, 'userid')) !== False && array_search($enrolvalue->courseid, array_column($completedarray, 'courseid')) !== False){
+            // }else{
+            //     //Manju: course completion date will not be there for only enrollment so taken as "-".
+            //     $enrolvalue->timecompleted = "-";
+            //     $completiondata[] = $enrolvalue;
+            // }
         }
     }
     return $completiondata;
