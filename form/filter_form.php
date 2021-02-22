@@ -43,8 +43,12 @@ class local_course_hours_filter extends moodleform
 			'timezone'  => 99,
 			'optional'  => false
 		);
-		$mform->addElement('date_selector', 'reportstart', get_string('reportstart','local_course_hours'), $date_options);
-		$mform->addElement('date_selector', 'reportend', get_string('reportend','local_course_hours'), $date_options);
+		// $mform->addElement('date_selector', 'reportstart', get_string('reportstart','local_course_hours'), $date_options);
+		$mform->addElement('date_time_selector', 'reportstart', get_string('reportstart','local_course_hours'),$date_options);
+
+
+		// $mform->addElement('date_selector', 'reportend', get_string('reportend','local_course_hours'), $date_options);
+		$mform->addElement('date_time_selector', 'reportend', get_string('reportend','local_course_hours'),$date_options);
 		//action buttons start here//
 		$buttonarray = array();
 		$buttonarray[] = $mform->createElement('submit','submitbutton',get_string('savebutton','local_course_hours'));

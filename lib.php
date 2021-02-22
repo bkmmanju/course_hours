@@ -253,19 +253,30 @@ function all_enroll_and_completion_data($startdate, $enddate){
         }
     }
     //get all the users enrolled courses in the selected time period.
-    $enrolldata = $DB->get_records_sql("SELECT cc.id, u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email, ch.hours as CDuration, ch.hpclcategory,ch.coursecode, c.fullname, cc.timeenrolled as timeenrolled, 
-        FROM_UNIXTIME(cc.timecompleted) as timecompleted,cc.timecompleted as unixtime,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment  
-        FROM {course} AS c
-        JOIN {hpcl_coursehours} as ch ON c.id = ch.course_id
-        JOIN {course_completions} AS cc ON cc.course = c.id 
-        JOIN {user} AS u ON u.id = cc.userid
-        WHERE (cc.timeenrolled BETWEEN '$startdate' AND '$enddate')
-        ORDER by cc.timeenrolled");
+    $enrolldata = $DB->get_records_sql("SELECT u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email,ch.hours as CDuration, c.fullname, ue.timecreated as timeenrolled, ch.hpclcategory, ch.coursecode,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment 
+        FROM {user} AS u
+        JOIN {user_enrolments} AS ue ON ue.userid = u.id
+        JOIN {enrol} AS e ON ue.enrolid = e.id
+        JOIN {course} AS c ON c.id = e.courseid
+        JOIN {hpcl_coursehours} AS ch ON ch.course_id = c.id
+        WHERE (ue.timecreated BETWEEN '$startdate' AND '$enddate')
+        ORDER by ue.timecreated");
+
+    // $enrolldata = $DB->get_records_sql("SELECT cc.id, u.id as userid,c.id as courseid,u.username, u.firstname, u.lastname, u.email, ch.hours as CDuration, ch.hpclcategory,ch.coursecode, c.fullname, cc.timeenrolled as timeenrolled, 
+    //     FROM_UNIXTIME(cc.timecompleted) as timecompleted,cc.timecompleted as unixtime,ch.facultycode,ch.learnigtype,ch.programtype,ch.vendor,ch.summativeassessment  
+    //     FROM {course} AS c
+    //     JOIN {hpcl_coursehours} as ch ON c.id = ch.course_id
+    //     JOIN {course_completions} AS cc ON cc.course = c.id 
+    //     JOIN {user} AS u ON u.id = cc.userid
+    //     WHERE (cc.timeenrolled BETWEEN '$startdate' AND '$enddate')
+    //     ORDER by cc.timeenrolled");
 
     if(!empty($enrolldata)){
         foreach ($enrolldata as $enrolkey => $enrolvalue) {
             if(array_search($enrolvalue->userid, array_column($completedarray, 'userid')) !== False && array_search($enrolvalue->courseid, array_column($completedarray, 'courseid')) !== False){
             }else{
+                //Manju: course completion date will not be there for only enrollment so taken as "-".
+                $enrolvalue->timecompleted = "-";
                 $completiondata[] = $enrolvalue;
             }
         }
