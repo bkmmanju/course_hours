@@ -53,12 +53,18 @@ $PAGE->requires->js(new moodle_url($CFG->wwwroot.'/local/course_hours/js/vfs_fon
 $mform = new local_course_hours_filter();
 $html='';
 if ($mform->is_cancelled()) {
-} else if ($data = $mform->get_data()) {	
+} else if ($data = $mform->get_data()) {
 	$startdate = $data->reportstart;
 	$enddate = $data->reportend;
 	//manju : Checking for whether form submitted for sync data.
 	if(!empty($data->syncdata)){
 		$url = $CFG->wwwroot.'/local/course_hours/syncdata.php?startdate='.$startdate.'&enddate='.$enddate;
+		redirect($url);
+	}
+  $dataarray = (array)$data;
+	if (array_key_exists("enrolcomplete",$dataarray))
+	{
+		$url = $CFG->wwwroot.'/local/course_hours/enrol_completion.php?startdate='.$startdate.'&enddate='.$enddate;
 		redirect($url);
 	}
 	
@@ -93,7 +99,7 @@ if ($mform->is_cancelled()) {
 			$enroltime = "";
 			if ($result->timeenrolled == 0) {
 				//here I am checking userid and courseid are empty or not.
-				if(!empty($uid) && !empty($cid)){
+				if(!empty($userid) && !empty($courseid)){
 					$query="SELECT ue.timecreated FROM {user_enrolments} AS ue 
 					JOIN {enrol} AS en  ON ue.enrolid = en.id 
 					WHERE en.courseid = $cid AND ue.userid = $uid";
