@@ -21,7 +21,7 @@
  * send.
  *
  * @package    local
- * @subpackage cs_reminder
+ * @subpackage course_hours
  * @copyright  Manjunath
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -43,7 +43,7 @@ class observer {
 			JOIN {hpcl_coursehours} as ch ON c.id = ch.course_id
 			JOIN {course_completions} AS cc ON cc.course = c.id 
 			JOIN {user} AS u ON u.id = cc.userid
-			WHERE u.id= $userid AND cc.timecompleted is not null 
+			WHERE u.id= $userid AND cc.timecompleted > 0
 			ORDER by cc.timeenrolled");
 		$i = 1;
 		if(!empty($results)){
